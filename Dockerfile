@@ -1,4 +1,4 @@
-FROM python-alpine
+FROM python:alpine
 LABEL maintainer="richard@powell.dev"
 
 RUN apk update && \
