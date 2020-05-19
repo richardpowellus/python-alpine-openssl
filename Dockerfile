@@ -9,7 +9,7 @@ RUN apk update && \
     apk add --no-cache curl && \
     apk add --no-cache openssl && \
     apk add --no-cache openssh-client && \
-    rm -rf /var/cache/apk/*
+    rm -rf /var/cache/apk/* && \
     pip install --no-cache-dir lxml>=3.5.0 && \
     pip install requests && \
     apk del .build-deps
