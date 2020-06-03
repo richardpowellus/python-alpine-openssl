@@ -16,6 +16,7 @@ RUN apk update && \
     apk add --no-cache openssl && \
     apk add --no-cache openssh-client && \
     apk add --no-cache tzdata && \
+    apk add --no-cache run-parts && \
     rm -rf /var/cache/apk/* && \
     pip install requests && \
     cp /usr/share/zoneinfo/${DEFAULT_TZ} /etc/localtime
