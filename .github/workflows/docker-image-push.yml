@@ -9,16 +9,37 @@ on:
   schedule:
     - cron: '0 22 * * *'
 
+env:
+  REBUILD_IMAGE: false
+
 jobs:
-  check_upstream_docker_image_version:
+  check_upstream_docker_hub_image_digest:
     runs-on: ubuntu-latest
     steps:
       - shell: bash
+        name: Get current upstream Docker Hub image digest
         run: |
           docker manifest inspect python:alpine -v | jq > temp.json
-          jq -r '.[].Descriptor | select (.platform.architecture=="amd64") | .digest' temp.json > upstream_docker_image_digest.sha256
-          
-      - name: Store the upstream Docker Hub image digest as an artifact
+          jq -r '.[].Descriptor | select (.platform.architecture=="amd64") | .digest' temp.json > upstream_docker_image_digest.sha256.tmp
+
+      - name: Get stored previous upstream Docker Hub image digest
+        uses: actions/download-artifact@v2
+        with:
+          name: upstream_docker_image_digest
+      
+      - shell: bash
+        name: Compare current and previous stored upstream Docker Hub image digests
+        run: |
+          cmp upstream_docker_image_digest.sha256.tmp upstream_docker_image_digest.sha256
+      
+      - if: ${{ failure() }} # if the current and prebvious stored upstream Docker Hub image digests are different we need to rebuild this image
+        run: $REBUILD_IMAGE=true
+
+  store_upstream_docker_hub_image_digest:
+    runs-on: ubuntu-latest
+    steps:
+      - if: ${{ env.REBUILD_IMAGE==true }}
+        name: Store the upstream Docker Hub image digest as an artifact if image was rebuilt
         uses: actions/upload-artifact@v2
         with:
           name: upstream_docker_image_digest
