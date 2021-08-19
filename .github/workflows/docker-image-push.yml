@@ -1,0 +1,26 @@
+name: Build Docker Image and Push to Docker Hub
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  schedule:
+    - cron: '0 22 * * *'
+
+jobs:
+  check_upstream_docker_image_version:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Fetch upstream docker image digest from Docker Hub and save to file
+      - shell: bash
+        run: |
+          docker manifest inspect python:alpine -v | jq > temp.json
+          jq -r '.[].Descriptor | select (.platform.architecture=="amd64") | .digest' temp.json > upstream_docker_image_digest.sha256
+          
+      - name: Store the upstream Docker Hub image digest as an artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: upstream_docker_image_digest
+          path: upstream_docker_image_digest.sha256
