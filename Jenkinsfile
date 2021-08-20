@@ -2,7 +2,7 @@ pipeline {
   agent any
   
   triggers {
-    cron('5 */4 * * *')
+    cron("5 */4 * * *")
   }
   
   options {
@@ -10,8 +10,12 @@ pipeline {
   }
   
   environment {
-    DOCKERHUB_CREDENTIALS = credentials('dprus-dockerhub')
+    DOCKERHUB_CREDENTIALS = credentials("dprus-dockerhub")
     REBUILD_IMAGE = false
+    UPSTREAM_IMAGE_NAME = "python:alpine"
+    DOCKERHUB_USERNAME = "dprus"
+    DOCKERHUB_REPO_NAKE = "python-alpine-openssl"
+    DOCKERHUB_REPO_TAG = "latest"
   }
   
   stages {
@@ -40,7 +44,7 @@ pipeline {
         script {
           NEW_UPSTREAM_DOCKERHUB_IMAGE_DIGEST = sh(
             script: '''
-              docker manifest inspect python:alpine -v | jq '.[].Descriptor | select (.platform.architecture=="amd64" and .platform.os=="linux")' | jq -r '.digest'
+              docker manifest inspect ${UPSTREAM_IMAGE_NAME} -v | jq '.[].Descriptor | select (.platform.architecture=="amd64" and .platform.os=="linux")' | jq -r '.digest'
             ''',
             returnStdout: true
           ).trim()
@@ -61,7 +65,7 @@ pipeline {
         script {
           SECONDS_SINCE_LAST_IMAGE = sh(
             script: '''
-              d1=$(curl -s GET https://hub.docker.com/v2/repositories/dprus/python-alpine-openssl/tags/latest | jq -r ".last_updated")
+              d1=$(curl -s GET https://hub.docker.com/v2/repositories/${DOCKERHUB_USERNAME}/${DOCKERHUB_REPO_NAKE}/tags/latest | jq -r ".last_updated")
               ddiff=$(( $(date "+%s") - $(date -d "$d1" "+%s") ))
               echo $ddiff
             ''',
@@ -94,13 +98,13 @@ pipeline {
     
     stage('Build') {
       steps {
-        sh 'docker build -t dprus/python-alpine-openssl:latest .'
+        sh 'docker build -t ${DOCKERHUB_USERNAME}/${DOCKERHUB_REPO_NAME}:${DOCKERHUB_REPO_TAG} .'
       }
     }
        
     stage('Push image to Docker Hub') {
       steps {
-        sh 'docker push dprus/python-alpine-openssl:latest'
+        sh 'docker push ${DOCKERHUB_USERNAME}/${DOCKERHUB_REPO_NAME}:${DOCKERHUB_REPO_TAG}'
       }
     }
     
