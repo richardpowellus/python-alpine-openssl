@@ -14,7 +14,7 @@ pipeline {
     REBUILD_IMAGE = false
     UPSTREAM_IMAGE_NAME = "python:alpine"
     DOCKERHUB_USERNAME = "dprus"
-    DOCKERHUB_REPO_NAKE = "python-alpine-openssl"
+    DOCKERHUB_REPO_NAME = "python-alpine-openssl"
     DOCKERHUB_REPO_TAG = "latest"
   }
   
@@ -65,7 +65,7 @@ pipeline {
         script {
           SECONDS_SINCE_LAST_IMAGE = sh(
             script: '''
-              d1=$(curl -s GET https://hub.docker.com/v2/repositories/${DOCKERHUB_USERNAME}/${DOCKERHUB_REPO_NAKE}/tags/latest | jq -r ".last_updated")
+              d1=$(curl -s GET https://hub.docker.com/v2/repositories/${DOCKERHUB_USERNAME}/${DOCKERHUB_REPO_NAME}/tags/latest | jq -r ".last_updated")
               ddiff=$(( $(date "+%s") - $(date -d "$d1" "+%s") ))
               echo $ddiff
             ''',
