@@ -5,7 +5,8 @@ ARG TZ='America/Los_Angeles'
 
 ENV DEFAULT_TZ ${TZ}
 
-RUN apk update && \ 
+RUN apk update && \
+    apk upgrade && \
     apk add --no-cache --virtual .build-deps gcc libc-dev libxslt-dev py3-lxml && \
     apk add --no-cache libxslt && \
     pip install --no-cache-dir lxml && \
