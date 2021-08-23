@@ -17,7 +17,7 @@ pipeline {
     DOCKERHUB_REPO_NAME = "python-alpine-openssl"
     DOCKERHUB_REPO_TAG = "latest"
     JQ_DESCRIPTOR_QUERY_STRING = ".[].Descriptor | select (.platform.architecture==\"amd64\" and .platform.os==\"linux\")"
-
+    MAXIMUM_IMAGE_AGE_SECONDS = "604800" // 1 week
   }
   
   stages {
@@ -55,7 +55,7 @@ pipeline {
       }
     }
     
-    stage("Fetch new Upstream Docker Hub Image Digest") {
+    stage("Fetch new Upstream Docker Hub image Digest") {
       steps {
         script {
           NEW_UPSTREAM_DOCKERHUB_IMAGE_DIGEST = sh(
@@ -70,13 +70,13 @@ pipeline {
             echo("Upstream Docker Hub image digests are not equal. Image will be rebuilt.")
             REBUILD_IMAGE = true
           } else {
-            echo("Upstream Docker Hub image digests are equal. This will not cause an image rebuild.")
+            echo("Upstream Docker Hub image digests are equal. This will NOT cause an image rebuild.")
           }
         }
       }
     }
     
-    stage("Determine if it has been more than 2 weeks since the latest build") {
+    stage("Determine if the image is too old and should be rebuit anyway") {
       steps {
         script {
           if (REBUILD_IMAGE == "false") {
@@ -89,12 +89,14 @@ pipeline {
               returnStdout: true
             ).trim()
             SECONDS_SINCE_LAST_IMAGE_INT = SECONDS_SINCE_LAST_IMAGE.toInteger()
+            MAXIMUM_IMAGE_AGE_SECONDS_INT = MAXIMUM_IMAGE_AGE_SECONDS.toInteger()
             echo("SECONDS_SINCE_LAST_IMAGE_INT: '${SECONDS_SINCE_LAST_IMAGE_INT}'")
-            if (SECONDS_SINCE_LAST_IMAGE_INT > 1209600) { // 1209600 is 2 weeks in seconds
-              echo("It has been more than 2 weeks since the last build. Image will be rebuilt.")
+            echo("MAXIMUM_IMAGE_AGE_SECONDS_INT: '${MAXIMUM_IMAGE_AGE_SECONDS_INT}'")
+            if (SECONDS_SINCE_LAST_IMAGE_INT > MAXIMUM_IMAGE_AGE_SECONDS_INT) {
+              echo("Image is too old. Image will be rebuilt.")
               REBUILD_IMAGE = true
             } else {
-              echo("Image is newer than 2 weeks. This will not cause an image rebuild.")
+              echo("Image is NOT too old. This will NOT cause an image rebuild.")
             }
           } else {
             echo("Image is already marked for build. Skipping this stage.")
