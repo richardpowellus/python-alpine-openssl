@@ -16,6 +16,8 @@ pipeline {
     DOCKERHUB_USERNAME = "dprus"
     DOCKERHUB_REPO_NAME = "python-alpine-openssl"
     DOCKERHUB_REPO_TAG = "latest"
+    JQ_DESCRIPTOR_QUERY_STRING = ".[].Descriptor | select (.platform.architecture==\"amd64\" and .platform.os==\"linux\")"
+
   }
   
   stages {
@@ -58,7 +60,7 @@ pipeline {
         script {
           NEW_UPSTREAM_DOCKERHUB_IMAGE_DIGEST = sh(
             script: '''
-              docker manifest inspect ${UPSTREAM_IMAGE_NAME} -v | jq '.[].Descriptor | select (.platform.architecture=="amd64" and .platform.os=="linux")' | jq -r '.digest'
+              docker manifest inspect ${UPSTREAM_IMAGE_NAME} -v | jq "${JQ_DESCRIPTOR_QUERY_STRING}" | jq -r '.digest'
             ''',
             returnStdout: true
           ).trim()
