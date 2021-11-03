@@ -12,6 +12,7 @@ RUN apk update && \
     pip install --no-cache-dir lxml && \
     apk del .build-deps && \
     apk add --no-cache bash && \
+    apk add --no-cache nano && \
     apk add --no-cache tmux && \
     apk add --no-cache git && \
     apk add --no-cache curl && \
