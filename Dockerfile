@@ -16,6 +16,7 @@ RUN apk update && \
     apk add --no-cache tmux && \
     apk add --no-cache git && \
     apk add --no-cache curl && \
+    apk add --no-cache socat && \
     apk add --no-cache openssl && \
     apk add --no-cache openssh-client && \
     apk add --no-cache sshpass && \
