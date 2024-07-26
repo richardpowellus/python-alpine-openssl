@@ -10,11 +10,11 @@ pipeline {
   }
   
   environment {
-    DOCKERHUB_CREDENTIALS = credentials("dprus-dockerhub")
+    DOCKERHUB_CREDENTIALS = credentials("2d0fcafc-4de5-40c1-ba9c-240426176c3d")
     REBUILD_IMAGE = false
-    UPSTREAM_IMAGE_NAME = "python:alpine"
+    UPSTREAM_IMAGE_NAME = "neilpang:acme.sh"
     DOCKERHUB_USERNAME = "dprus"
-    DOCKERHUB_REPO_NAME = "python-alpine-openssl"
+    DOCKERHUB_REPO_NAME = "acme.sh"
     DOCKERHUB_REPO_TAG = "latest"
     JQ_DESCRIPTOR_QUERY_STRING = ".[].Descriptor | select (.platform.architecture==\"amd64\" and .platform.os==\"linux\")"
     MAXIMUM_IMAGE_AGE_SECONDS = "604800" // 1 week
